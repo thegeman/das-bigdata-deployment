@@ -22,6 +22,8 @@ def parse_arguments():
     reserve_parser.add_argument("-q", "--quiet", help="output only the reservation id", action="store_true")
     reserve_parser.set_defaults(func=reserve_machines)
 
+    return parser.parse_args()
+
 def _reserve_machines(num_machines, time, quiet=False):
     """Reserves a number of machines for a given time and outputs the reservation id."""
     if num_machines < 1:
