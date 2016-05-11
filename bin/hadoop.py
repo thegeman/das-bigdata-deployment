@@ -150,7 +150,7 @@ def _deploy_hadoop(installation_dir, version, master, workers, yarn_mb, java_hom
     log(indent, "Deploying Hadoop to master \"%s\" and %d workers..." % (master, len(workers)))
 
     # Generate configuration files using the included templates
-    template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), HADOOP_VERSIONS[version]["template_dir"])
+    template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "hadoop", HADOOP_VERSIONS[version]["template_dir"])
     config_dir = os.path.join(installation_dir, "etc", "hadoop")
     substitutions = {
         "__USER__": os.environ["USER"],
