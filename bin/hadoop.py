@@ -208,21 +208,21 @@ def install_hadoop(args):
     """Extracts arguments from CLI to install Hadoop."""
     # Verify that the Hadoop version is correct
     check_hadoop_version(args.hadoop_version)
-    _fetch_hadoop(args.framework_dir, args.hadoop_version, args.reinstall)
+    _fetch_hadoop(os.path.expandvars(args.framework_dir), args.hadoop_version, args.reinstall)
 
 def deploy_hadoop(args):
     """Extracts arguments from CLI to deploy Hadoop."""
     # Verify that the Hadoop version is correct
     check_hadoop_version(args.hadoop_version)
     # Verify that the Hadoop distribution is "installed"
-    installation_dir = os.path.join(args.framework_dir, "hadoop-%s" % args.hadoop_version)
+    installation_dir = os.path.join(os.path.expandvars(args.framework_dir), "hadoop-%s" % args.hadoop_version)
     if not os.path.isdir(installation_dir):
         print("Hadoop version %s not found at directory \"%s\". Please install Hadoop first." % (args.hadoop_version, installation_dir))
         return
     # Compose set of workers
     workers = set(worker.strip() for worker_list in args.worker if worker_list.strip() for worker in worker_list.split(",") if worker.strip())
 
-    _deploy_hadoop(installation_dir, args.hadoop_version, args.master, workers, args.yarn_memory_mb, args.java_home)
+    _deploy_hadoop(installation_dir, args.hadoop_version, args.master, workers, args.yarn_memory_mb, os.path.expandvars(args.java_home))
 
 def list_hadoop_versions(args):
     """Lists supported Hadoop versions."""
