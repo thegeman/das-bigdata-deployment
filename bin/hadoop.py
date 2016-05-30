@@ -10,6 +10,7 @@ import subprocess
 import tarfile
 import tempfile
 import urllib2
+import utildeployer
 
 DEFAULT_FRAMEWORK_DIR="frameworks/"
 DEFAULT_HADOOP_VERSION="2.6.0"
@@ -27,15 +28,6 @@ HADOOP_VERSIONS={
 class HadoopVersionNotSupportedError(Exception): pass
 class DownloadFailedError(Exception): pass
 class InstallFailedError(Exception): pass
-
-def log(indentation, message):
-    indent_str = ""
-    while indentation > 1:
-        indent_str += "|  "
-        indentation -= 1
-    if indentation == 1:
-        indent_str += "|- "
-    print(indent_str + message)
 
 def parse_arguments():
     """Parses arguments passed on the command-line."""
