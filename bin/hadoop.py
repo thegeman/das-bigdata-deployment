@@ -6,6 +6,7 @@ import glob
 import os.path
 import re
 import shutil
+import subprocess
 import tarfile
 import tempfile
 import urllib2
@@ -73,6 +74,11 @@ def check_hadoop_version(requested_version):
     """Raises HadoopVersionNotSupportedError iff the given Hadoop version is not valid or not supported."""
     if not requested_version in HADOOP_VERSIONS:
         raise HadoopVersionNotSupportedError("Unsupported Hadoop version: %s." % requested_version)
+
+def execute_command_quietly(command_line_list):
+    """Executes a command, given as a list, while supressing any output."""
+    with open(os.devnull, "wb") as devnull:
+        subprocess.check_call(command_line_list, stdout=devnull, stderr=subprocess.STDOUT)
 
 def _fetch_hadoop(framework_dir, version, forced=False, tmpdir=None, indent=0):
     """Fetches and extracts a Hadoop distribution."""
@@ -181,28 +187,28 @@ def _deploy_hadoop(installation_dir, version, master, workers, yarn_mb, java_hom
     log(indent + 1, "Creating a clean environment on the master and workers...")
     local_hadoop_dir = "/local/%s/hadoop/" % substitutions["__USER__"]
     log(indent + 2, "Purging \"%s\" on master...")
-    os.system('ssh "%s" "rm -rf \\"%s\\""' % (master, local_hadoop_dir))
+    execute_command_quietly(["ssh", master, 'rm -rf "%s"' % local_hadoop_dir])
     log(indent + 2, "Purging \"%s\" on workers...")
     for worker in workers:
-        os.system('ssh "%s" "rm -rf \\"%s\\""' % (worker, local_hadoop_dir))
+        execute_command_quietly(['ssh', worker, 'rm -rf "%s"' % local_hadoop_dir])
     log(indent + 2, "Creating directory structure on master...")
-    os.system('ssh "%s" "mkdir -p \\"%s\\""' % (master, local_hadoop_dir))
+    execute_command_quietly(['ssh', master, 'mkdir -p "%s"' % local_hadoop_dir])
     log(indent + 2, "Creating directory structure on workers...")
     for worker in workers:
-        os.system('ssh "%s" "mkdir -p \\"%s/tmp\\" \\"%s/datanode\\""' % (worker, local_hadoop_dir, local_hadoop_dir))
+        execute_command_quietly(['ssh', worker, 'mkdir -p "%s/tmp" "%s/datanode"' % (local_hadoop_dir, local_hadoop_dir)])
     log(indent + 2, "Clean environment set up.")
 
     # Start HDFS
     log(indent + 1, "Deploying HDFS...")
     hadoop_home = os.path.realpath(installation_dir)
     log(indent + 2, "Formatting namenode...")
-    os.system('ssh "%s" "\\"%s/bin/hadoop\\" namenode -format"' % (master, hadoop_home))
+    execute_command_quietly(['ssh', master, '"%s/bin/hadoop" namenode -format' % hadoop_home])
     log(indent + 2, "Starting HDFS...")
-    os.system('ssh "%s" "\\"%s/sbin/start-dfs.sh\\""' % (master, hadoop_home))
+    execute_command_quietly(['ssh', master, '"%s/sbin/start-dfs.sh"' % hadoop_home])
 
     # Start YARN
     log(indent + 1, "Deploying YARN...")
-    os.system('ssh "%s" "\\"%s/sbin/start-yarn.sh\\""' % (master, hadoop_home))
+    execute_command_quietly(['ssh', master, '"%s/sbin/start-yarn.sh"' % hadoop_home])
 
     log(indent + 1, "Hadoop cluster deployed.")
 
