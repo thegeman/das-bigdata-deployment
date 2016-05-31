@@ -12,7 +12,7 @@ class DownloadFailedError(Exception): pass
 class MissingArchiveError(Exception): pass
 class InstallFailedError(Exception): pass
 
-class Framework:
+class Framework(object):
     def __init__(self, identifier, name):
         self.__identifier = identifier
         self.__name = name
@@ -45,7 +45,7 @@ class Framework:
     def __repr__(self):
         return "Framework{identifier=%s,name=%s}" % (self.identifier, self.name)
 
-class FrameworkVersion:
+class FrameworkVersion(object):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir):
         self.__version = version
         self.__archive_url = archive_url
