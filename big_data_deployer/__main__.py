@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from . import *
+from . import preserve
 import argparse
 import sys
 
@@ -13,6 +14,7 @@ def parse_arguments():
 
     add_list_frameworks_subparser(subparsers)
     add_install_subparser(subparsers)
+    preserve.add_preserve_subparser(subparsers)
 
     return parser.parse_args()
 

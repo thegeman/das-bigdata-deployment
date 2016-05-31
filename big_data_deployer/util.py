@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 import os
+import subprocess
 
 def log(indentation, message):
     indent_str = ""
@@ -19,4 +20,7 @@ def execute_command_quietly(command_line_list):
     """Executes a command, given as a list, while supressing any output."""
     with open(os.devnull, "wb") as devnull:
         subprocess.check_call(command_line_list, stdout=devnull, stderr=subprocess.STDOUT)
+
+def execute_command_for_output(command_line_list):
+    return subprocess.Popen(command_line_list, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
 
