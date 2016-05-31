@@ -88,10 +88,9 @@ class FrameworkRegistry:
         else:
             raise KeyError("Framework %s has not been registered." % framework_identifier)
 
-    def get():
-        return __FrameworkRegistry_singleton
-
 __FrameworkRegistry_singleton = FrameworkRegistry()
+def get_framework_registry():
+    return __FrameworkRegistry_singleton
 
 class FrameworkManager:
     def __init__(self, framework_registry, framework_dir, temp_dir=None):
