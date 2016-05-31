@@ -71,22 +71,12 @@ class FrameworkVersion:
     def __repr__(self):
         return self.version
 
-class FrameworkManager:
-    def __init__(self, framework_dir, temp_dir=None):
-        self.__framework_dir = framework_dir
-        self.__frameworks = {}
-        self.__temp_dir = temp_dir
+class FrameworkRegistry:
+    def __init__(self):
+        self_frameworks = {}
 
     def register_framework(self, framework):
         self.__frameworks[framework.identifier] = framework
-
-    @property
-    def framework_dir(self):
-        return self.__framework_dir
-
-    @property
-    def archive_dir(self):
-        return os.path.join(self.framework_dir, "archives")
 
     @property
     def frameworks(self):
@@ -98,6 +88,29 @@ class FrameworkManager:
         else:
             raise KeyError("Framework %s has not been registered." % framework_identifier)
 
+    def get():
+        return __FrameworkRegistry_singleton
+
+__FrameworkRegistry_singleton = FrameworkRegistry()
+
+class FrameworkManager:
+    def __init__(self, framework_registry, framework_dir, temp_dir=None):
+        self.__framework_dir = framework_dir
+        self.__framework_registry = framework_registry
+        self.__temp_dir = temp_dir
+
+    @property
+    def framework_registry(self):
+        return self.__framework_registry
+
+    @property
+    def framework_dir(self):
+        return self.__framework_dir
+
+    @property
+    def archive_dir(self):
+        return os.path.join(self.framework_dir, "archives")
+
     def __archive_file(self, framework, framework_version):
         return os.path.join(self.archive_dir, "%s.%s" % (framework.version_identifier(framework_version.version), framework_version.archive_extension))
 
@@ -108,7 +121,7 @@ class FrameworkManager:
 
     def download(self, framework_identifier, version, force_redownload=False, log_fn=util.log):
         """Fetches a Big Data framework distribution."""
-        framework = self.framework(framework_identifier)
+        framework = self.framework_registry.framework(framework_identifier)
         framework_version = framework.version(version)
         log_fn(0, "Obtaining %s version %s distribution..." % (framework.name, version))
         
@@ -146,7 +159,7 @@ class FrameworkManager:
 
     def install(self, framework_identifier, version, force_reinstall=False, download_if_missing=True, log_fn=util.log):
         """Installs a Big Data framework distribution."""
-        framework = self.framework(framework_identifier)
+        framework = self.framework_registry.framework(framework_identifier)
         framework_version = framework.version(version)
         log_fn(0, "Installing %s version %s..." % (framework.name, version))
 
