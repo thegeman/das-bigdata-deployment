@@ -73,7 +73,7 @@ class FrameworkVersion:
 
 class FrameworkRegistry:
     def __init__(self):
-        self_frameworks = {}
+        self.__frameworks = {}
 
     def register_framework(self, framework):
         self.__frameworks[framework.identifier] = framework
