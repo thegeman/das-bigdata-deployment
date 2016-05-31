@@ -116,7 +116,7 @@ class PreserveManager:
             reservations = self.get_reservations()
             if not int(reservation_id) in reservations:
                 raise ReservationNotFoundException('Could not find reservation for id "%s".' % reservation_id)
-            return reservation[int(reservation_id)]
+            return reservations[int(reservation_id)]
 
 
 def add_preserve_subparser(parser):
