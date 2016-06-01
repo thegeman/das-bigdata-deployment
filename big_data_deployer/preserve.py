@@ -111,7 +111,7 @@ class PreserveManager:
             if len(reservations) == 0:
                 raise ReservationNotFoundException("Could not retrieve last reservation; no reservations were found.")
             reservation_ids = sorted(reservations.keys())
-            return reservation[reservation_ids[-1]]
+            return reservations[reservation_ids[-1]]
         else:
             reservations = self.get_reservations()
             if not int(reservation_id) in reservations:
