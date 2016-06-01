@@ -1,6 +1,11 @@
 #!/usr/bin/env python2
 
+from __future__ import print_function
 from .frameworkmanager import Framework, FrameworkVersion, FrameworkRegistry, get_framework_registry
+from . import util
+import glob
+import os.path
+import re
 
 class ZookeeperFrameworkVersion(FrameworkVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
@@ -63,7 +68,7 @@ class ZookeeperFramework(Framework):
         log_fn(1, 'ZooKeeper is now listening on "%s:2181".' % master)
 
     def get_supported_deployment_settings(self, framework_version):
-        return _ALL_SETTINGS
+        return []
 
 get_framework_registry().register_framework(ZookeeperFramework())
 get_framework_registry().framework("zookeeper").add_version(ZookeeperFrameworkVersion("3.4.8", "http://ftp.tudelft.nl/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz", "tar.gz", "zookeeper-3.4.8", "3.4.x"))
