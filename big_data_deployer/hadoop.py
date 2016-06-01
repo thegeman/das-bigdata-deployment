@@ -16,8 +16,6 @@ _ALL_SETTINGS = [
 
 _DEFAULT_YARN_MB = 4096
 
-class InvalidSetupError(Exception): pass
-
 class HadoopFrameworkVersion(FrameworkVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
         super(HadoopFrameworkVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
@@ -34,7 +32,7 @@ class HadoopFramework(Framework):
     def deploy(self, hadoop_home, framework_version, machines, settings, log_fn=util.log):
         """Deploys Hadoop to a given set of workers and a master node."""
         if len(machines) < 2:
-            raise InvalidSetupError("Hadoop requires at least two machines: a master and at least one worker.")
+            raise util.InvalidSetupError("Hadoop requires at least two machines: a master and at least one worker.")
 
         master = machines[0]
         workers = machines[1:]
@@ -47,7 +45,7 @@ class HadoopFramework(Framework):
         yarn_mb = settings.pop(_SETTING_YARN_MB, _DEFAULT_YARN_MB)
         java_home = settings.pop(_SETTING_JAVA_HOME)
         if len(settings) > 0:
-            raise InvalidSetupError("Hadoop found unknown settings: '%s'" % "','".join(settings.keys()))
+            raise util.InvalidSetupError("Found unknown settings for Hadoop: '%s'" % "','".join(settings.keys()))
 
         # Generate configuration files using the included templates
         template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "hadoop", framework_version.template_dir)

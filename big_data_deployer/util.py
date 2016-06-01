@@ -4,6 +4,8 @@ from __future__ import print_function
 import os
 import subprocess
 
+class InvalidSetupError(Exception): pass
+
 def log(indentation, message):
     indent_str = ""
     while indentation > 1:
