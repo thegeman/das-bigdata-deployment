@@ -69,7 +69,7 @@ def deploy_framework(args):
     else:
         # Retrieve the set of machines assigned to the preserve reservation
         reservation = preserve.get_PreserveManager().fetch_reservation(args.preserve_id)
-        machines = reservation.machines
+        machines = reservation.assigned_machines
 
         # Parse settings
         settings = {}
@@ -78,12 +78,12 @@ def deploy_framework(args):
                 for line in settings_file_content:
                     stripped_line = line.strip()
                     if stripped_line and not stripped_line.startswith("#"):
-                        if not stripped_line.contains("="):
+                        if "=" not in stripped_line:
                             raise InvalidSettingError('Setting "%s" in file "%s" is not a "key=value" pair.' % (line, settings_file))
                         key_value = stripped_line.split("=", 1)
                         settings[key_value[0].strip()] = key_value[1].strip()
         for setting in args.SETTINGS:
-            if not settings.contains("="):
+            if "=" not in setting:
                 raise InvalidSettingError('Setting "%s" on command line is not a "key=value" pair.' % setting)
             key_value = setting.split("=", 1)
             settings[key_value[0].strip()] = key_value[1].strip()

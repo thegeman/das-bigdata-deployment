@@ -5,6 +5,7 @@ from .frameworkmanager import Framework, FrameworkVersion, FrameworkRegistry, ge
 from . import util
 import glob
 import os.path
+import re
 
 _SETTING_JAVA_HOME = "java_home"
 _SETTING_YARN_MB = "yarn_memory_mb"
@@ -80,27 +81,27 @@ class HadoopFramework(Framework):
         log_fn(1, "Creating a clean environment on the master and workers...")
         local_hadoop_dir = "/local/%s/hadoop/" % substitutions["__USER__"]
         log_fn(2, "Purging \"%s\" on master...")
-        execute_command_quietly(["ssh", master, 'rm -rf "%s"' % local_hadoop_dir])
+        util.execute_command_quietly(["ssh", master, 'rm -rf "%s"' % local_hadoop_dir])
         log_fn(2, "Purging \"%s\" on workers...")
         for worker in workers:
-            execute_command_quietly(['ssh', worker, 'rm -rf "%s"' % local_hadoop_dir])
+            util.execute_command_quietly(['ssh', worker, 'rm -rf "%s"' % local_hadoop_dir])
         log_fn(2, "Creating directory structure on master...")
-        execute_command_quietly(['ssh', master, 'mkdir -p "%s"' % local_hadoop_dir])
+        util.execute_command_quietly(['ssh', master, 'mkdir -p "%s"' % local_hadoop_dir])
         log_fn(2, "Creating directory structure on workers...")
         for worker in workers:
-            execute_command_quietly(['ssh', worker, 'mkdir -p "%s/tmp" "%s/datanode"' % (local_hadoop_dir, local_hadoop_dir)])
+            util.execute_command_quietly(['ssh', worker, 'mkdir -p "%s/tmp" "%s/datanode"' % (local_hadoop_dir, local_hadoop_dir)])
         log_fn(2, "Clean environment set up.")
 
         # Start HDFS
         log_fn(1, "Deploying HDFS...")
         log_fn(2, "Formatting namenode...")
-        execute_command_quietly(['ssh', master, '"%s/bin/hadoop" namenode -format' % hadoop_home])
+        util.execute_command_quietly(['ssh', master, '"%s/bin/hadoop" namenode -format' % hadoop_home])
         log_fn(2, "Starting HDFS...")
-        execute_command_quietly(['ssh', master, '"%s/sbin/start-dfs.sh"' % hadoop_home])
+        util.execute_command_quietly(['ssh', master, '"%s/sbin/start-dfs.sh"' % hadoop_home])
 
         # Start YARN
         log_fn(1, "Deploying YARN...")
-        execute_command_quietly(['ssh', master, '"%s/sbin/start-yarn.sh"' % hadoop_home])
+        util.execute_command_quietly(['ssh', master, '"%s/sbin/start-yarn.sh"' % hadoop_home])
 
         log_fn(1, "Hadoop cluster deployed.")
 
