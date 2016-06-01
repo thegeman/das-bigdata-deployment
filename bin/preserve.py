@@ -20,7 +20,7 @@ def parse_arguments():
     # Add subparser for "reserve" command
     reserve_parser = subparsers.add_parser("reserve", help="reserve machines", fromfile_prefix_chars="@")
     reserve_parser.add_argument("-n", "--num-machines", help="number of machines to reserve", action="store", type=int, default=DEFAULT_NUM_MACHINES)
-    reserve_parser.add_argument("-t", "--time", help="time to reserve machines for as [[hh:]mm:]ss", action="store", default=DEFAULT_TIME)
+    reserve_parser.add_argument("-t", "--time", help="time to reserve machines for as [[hh:]mm:]ss (default: %s)" % DEFAULT_TIME, action="store", default=DEFAULT_TIME)
     reserve_parser.add_argument("-q", "--quiet", help="output only the reservation id", action="store_true")
     reserve_parser.set_defaults(func=reserve_machines)
 

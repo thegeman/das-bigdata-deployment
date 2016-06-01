@@ -140,11 +140,11 @@ def add_preserve_subparser(parser):
     fetch_parser.add_argument("RESERVATION_ID", help="id of the reservation to display, or 'LAST' to fetch the last reservation made by the user", action="store")
     fetch_parser.set_defaults(func=__fetch_reservation)
 
-def __get_PreserveManager():
+def get_PreserveManager():
     return PreserveManager(os.environ["USER"])
 
 def __create_reservation(args):
-    pm = __get_PreserveManager()
+    pm = get_PreserveManager()
     reservation_id = pm.create_reservation(args.NUM_MACHINES, args.time)
     if args.quiet:
         print(reservation_id)
@@ -152,7 +152,7 @@ def __create_reservation(args):
         print("Reservation succesful. Reservation ID is %s." % reservation_id)
 
 def __list_reservations(args):
-    pm = __get_PreserveManager()
+    pm = get_PreserveManager()
     if args.all:
         reservations = pm.get_reservations()
         print("id\tusername\tstate\tnum_machines")
@@ -165,7 +165,7 @@ def __list_reservations(args):
             print("%s\t%s\t%s" % (reservation.reservation_id, reservation.state, reservation.num_machines))
 
 def __fetch_reservation(args):
-    pm = __get_PreserveManager()
+    pm = get_PreserveManager()
     reservation = pm.fetch_reservation(args.RESERVATION_ID)
 
     print("Reservation ID: %s" % reservation.reservation_id)

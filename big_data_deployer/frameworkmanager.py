@@ -42,6 +42,12 @@ class Framework(object):
     def add_version(self, framework_version):
         self.__versions[framework_version.version] = framework_version
 
+    def deploy(self, install_dir, framework_version, machines, settings, log_fn=util.log):
+        raise NotImplementedError()
+
+    def get_supported_deployment_settings(self, framework_version):
+        return []
+
     def __repr__(self):
         return "Framework{identifier=%s,name=%s}" % (self.identifier, self.name)
 
@@ -118,6 +124,9 @@ class FrameworkManager:
         archive_file = self.__archive_file(framework, framework_version)
         return os.path.exists(archive_file) and os.path.isfile(archive_file)
 
+    def __install_dir(self, framework, framework_version):
+        return os.path.join(self.framework_dir, framework.version_identifier(framework_version.version))
+
     def download(self, framework_identifier, version, force_redownload=False, log_fn=util.log):
         """Fetches a Big Data framework distribution."""
         framework = self.framework_registry.framework(framework_identifier)
@@ -165,7 +174,7 @@ class FrameworkManager:
         # Check if a previous installation of the framework already exists
         # If so, either remove for a forced reinstall, or return
         log_fn(1, "Checking if previous installation of %s version %s is present..." % (framework.name, version))
-        target_dir = os.path.join(self.framework_dir, framework.version_identifier(version))
+        target_dir = self.__install_dir(framework, framework_version)
         if os.path.exists(target_dir):
             if force_reinstall:
                 log_fn(2, "Found previous installation of %s. Removing to do a forced reinstall." % framework.name)
@@ -203,4 +212,18 @@ class FrameworkManager:
 
         log_fn(1, "%s version %s is now available at \"%s\"." % (framework.name, version, target_dir))
 
+    def deploy(self, framework_identifier, version, machines, settings, log_fn=util.log):
+        """Deploys a Big Data framework distribution."""
+        framework = self.framework_registry.framework(framework_identifier)
+        framework_version = framework.version(version)
+        log_fn(0, "Deploying %s version %s to cluster of %d machines..." % (framework.name, version, len(machines)))
+
+        install_dir = self.__install_dir(framework, framework_version)
+        framework.deploy(install_dir, framework_version, machines, settings, log_fn=util.create_log_fn(1, log_fn))
+
+    def get_supported_deployment_settings(self, framework_identifier, version):
+        """Retrieves a list of supported deployment settings and their descriptions for a given Big Data framework and version."""
+        framework = self.framework_registry.framework(framework_identifier)
+        framework_version = framework.version(version)
+        return framework.get_supported_deployment_settings(framework_version)
 
