@@ -1,9 +1,3 @@
 #!/usr/bin/bash
 
-old_dir=$(pwd -P)
-script_dir=$(cd "$(dirname $0)" && pwd -P)
-
-cd "$script_dir"
 /usr/bin/env python2 -m big_data_deployer $@
-cd "$old_dir"
-
