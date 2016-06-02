@@ -6,7 +6,7 @@ from . import preserve
 import argparse
 import sys
 
-DEFAULT_FRAMEWORK_DIR="frameworks/"
+DEFAULT_FRAMEWORK_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "frameworks")
 
 class InvalidSettingError(Exception): pass
 
