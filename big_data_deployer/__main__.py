@@ -4,6 +4,7 @@ from __future__ import print_function
 from . import *
 from . import preserve
 import argparse
+import os.path
 import sys
 
 DEFAULT_FRAMEWORK_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "frameworks")
