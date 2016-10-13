@@ -63,7 +63,7 @@ class ZookeeperFramework(Framework):
 
         # Start YARN
         log_fn(1, "Deploying ZooKeeper...")
-        util.execute_command_quietly(['ssh', master, '"%s/bin/zkServer.sh start"' % zookeeper_home])
+        util.execute_command_quietly(['ssh', master, '"%s/bin/zkServer.sh" start' % zookeeper_home])
 
         log_fn(1, 'ZooKeeper is now listening on "%s:2181".' % master)
 
