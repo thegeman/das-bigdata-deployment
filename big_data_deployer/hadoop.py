@@ -78,9 +78,9 @@ class HadoopFramework(Framework):
         # Clean up previous Hadoop deployments
         log_fn(1, "Creating a clean environment on the master and workers...")
         local_hadoop_dir = "/local/%s/hadoop/" % substitutions["__USER__"]
-        log_fn(2, "Purging \"%s\" on master...")
+        log_fn(2, "Purging \"%s\" on master..." % local_hadoop_dir)
         util.execute_command_quietly(["ssh", master, 'rm -rf "%s"' % local_hadoop_dir])
-        log_fn(2, "Purging \"%s\" on workers...")
+        log_fn(2, "Purging \"%s\" on workers..." % local_hadoop_dir)
         for worker in workers:
             util.execute_command_quietly(['ssh', worker, 'rm -rf "%s"' % local_hadoop_dir])
         log_fn(2, "Creating directory structure on master...")
