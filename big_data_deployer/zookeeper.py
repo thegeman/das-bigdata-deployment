@@ -55,7 +55,7 @@ class ZookeeperFramework(Framework):
         # Clean up previous ZooKeeper deployments
         log_fn(1, "Creating a clean environment on the ZooKeeper machine...")
         local_zookeeper_dir = "/local/%s/zookeeper/" % substitutions["__USER__"]
-        log_fn(2, "Purging \"%s\"...")
+        log_fn(2, "Purging \"%s\"..." % local_zookeeper_dir)
         util.execute_command_quietly(["ssh", master, 'rm -rf "%s"' % local_zookeeper_dir])
         log_fn(2, "Creating directory structure...")
         util.execute_command_quietly(['ssh', master, 'mkdir -p "%s"' % local_zookeeper_dir])
