@@ -64,9 +64,12 @@ def deploy_framework(args):
     fm = FrameworkManager(get_framework_registry(), args.framework_dir)
     if args.list_settings:
         supported_settings = fm.get_supported_deployment_settings(args.FRAMEWORK, args.VERSION)
-        max_len = max([len(key) for key, value in supported_settings])
-        for setting_name, setting_desc in supported_settings:
-            print("%s  %s" % (setting_name.ljust(max_len), setting_desc))
+        if supported_settings:
+            max_len = max([len(key) for key, value in supported_settings])
+            for setting_name, setting_desc in supported_settings:
+                print("%s  %s" % (setting_name.ljust(max_len), setting_desc))
+        else:
+            print("No settings available")
     else:
         # Retrieve the set of machines assigned to the preserve reservation
         reservation = preserve.get_PreserveManager().fetch_reservation(args.preserve_id)
