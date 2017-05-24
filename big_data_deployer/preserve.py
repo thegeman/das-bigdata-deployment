@@ -59,7 +59,7 @@ def PreserveReservation_from_preserve_line(line):
             end_time="%s %s" % (parts[4], parts[5]),
             state=parts[6],
             num_machines=int(parts[7]),
-            assigned_machines=sorted(parts[8:])
+            assigned_machines=sorted(["%s.ib.cluster" % part for part in parts[8:]])
         )
 
 class PreserveManager:

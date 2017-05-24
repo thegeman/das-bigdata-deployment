@@ -53,5 +53,10 @@
 		<value>__YARN_MB__</value>
 	</property>
 
+	<property>
+		<name>yarn.log-aggregation-enable</name>
+		<value>__LOG_AGGREGATION__</value>
+	</property>
+
 </configuration>
 
