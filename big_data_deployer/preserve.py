@@ -120,7 +120,12 @@ class PreserveManager:
             if not int(reservation_id) in reservations:
                 raise ReservationNotFoundException('Could not find reservation for id "%s".' % reservation_id)
             return reservations[int(reservation_id)]
-
+    
+    def kill_reservation(self, reservation_id):
+        reservation = self.fetch_reservation(reservation_id)
+        if not reservation.username == self.username:
+            raise ReservationNotFoundException("Reservation for given id does not belong to the user.")
+        util.execute_command_quietly(["preserve", "-c", str(reservation_id)])
 
 def add_preserve_subparser(parser):
     preserve_parser = parser.add_parser("preserve", help="manage reservations using preserve")
@@ -149,6 +154,11 @@ def add_preserve_subparser(parser):
     wait_parser.add_argument("-q", "--quiet", help="do not output anything", action="store_true")
     wait_parser.add_argument("RESERVATION_ID", help="id of the reservation to wait for, or 'LAST' to wait for the last reservation made by the user", action="store")
     wait_parser.set_defaults(func=__wait_for_reservation)
+
+    # Add subparser for "kill-reservation" command
+    kill_parser = preserve_subparsers.add_parser("kill-reservation", help="terminate and clean up a reservation")
+    kill_parser.add_argument("RESERVATION_ID", help="id of the reservation to kill, or 'LAST' to kill the last reservation made by the user", action="store")
+    kill_parser.set_defaults(func=__kill_reservation)
 
 def get_PreserveManager():
     return PreserveManager(os.environ["USER"])
@@ -218,3 +228,6 @@ def __wait_for_reservation(args):
         elif timeswaited == 76:
             waittime = 30 # After 15 minutes, decrease the polling frequency
 
+def __kill_reservation(args):
+    pm = get_PreserveManager()
+    pm.kill_reservation(args.RESERVATION_ID)
