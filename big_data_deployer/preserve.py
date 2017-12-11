@@ -4,9 +4,12 @@ from __future__ import print_function
 from . import util
 import argparse
 import os
+import sys
+import time
 
 DEFAULT_NUM_MACHINES=1
 DEFAULT_TIME="0:15:00"
+DEFAULT_TIMEOUT=1800
 
 class InvalidNumMachinesException(Exception): pass
 class ReservationFailedException(Exception): pass
@@ -140,6 +143,13 @@ def add_preserve_subparser(parser):
     fetch_parser.add_argument("RESERVATION_ID", help="id of the reservation to display, or 'LAST' to fetch the last reservation made by the user", action="store")
     fetch_parser.set_defaults(func=__fetch_reservation)
 
+    # Add subparser for "wait-for-reservation" command
+    wait_parser = preserve_subparsers.add_parser("wait-for-reservation", help="wait for a reservation to enter the ready state")
+    wait_parser.add_argument("-t", "--timeout", help="maximum time in seconds to wait before exiting with an error code (default: %u)" % DEFAULT_TIMEOUT, action="store", default=DEFAULT_TIMEOUT)
+    wait_parser.add_argument("-q", "--quiet", help="do not output anything", action="store_true")
+    wait_parser.add_argument("RESERVATION_ID", help="id of the reservation to wait for, or 'LAST' to wait for the last reservation made by the user", action="store")
+    wait_parser.set_defaults(func=__wait_for_reservation)
+
 def get_PreserveManager():
     return PreserveManager(os.environ["USER"])
 
@@ -176,4 +186,35 @@ def __fetch_reservation(args):
         print("Machines:       %s" % " ".join(reservation.assigned_machines))
     else:
         print("Req. machines:  %d" % reservation.num_machines)
+
+def __wait_for_reservation(args):
+    pm = get_PreserveManager()
+    starttime = time.time()
+    lasttime = starttime + int(args.timeout)
+
+    waittime = 5
+    timeswaited = 0
+
+    while True:
+        state = pm.fetch_reservation(args.RESERVATION_ID).state
+        if state == "R":
+            break
+
+        curtime = time.time()
+        maxwaittime = lasttime - curtime
+        nextwaittime = int(min(maxwaittime, waittime))
+        if nextwaittime <= 0:
+            print("[%.1f] Current state: %s. Reached timeout." % (curtime, state))
+            sys.exit("wait-for-reservation timed out")
+        if not args.quiet:
+            print("[%.1f] Current state: %s. Waiting %u more seconds." % (curtime, state, nextwaittime))
+        time.sleep(nextwaittime)
+
+        timeswaited += 1
+        if timeswaited == 12:
+            waittime = 10 # After a minute, decrease the polling frequency
+        elif timeswaited == 36:
+            waittime = 15 # After 5 minutes, decrease the polling frequency
+        elif timeswaited == 76:
+            waittime = 30 # After 15 minutes, decrease the polling frequency
 
