@@ -125,7 +125,7 @@ class PreserveManager:
         reservation = self.fetch_reservation(reservation_id)
         if not reservation.username == self.username:
             raise ReservationNotFoundException("Reservation for given id does not belong to the user.")
-        util.execute_command_quietly(["preserve", "-c", str(reservation_id)])
+        util.execute_command_quietly(["preserve", "-c", str(reservation.reservation_id)])
 
 def add_preserve_subparser(parser):
     preserve_parser = parser.add_parser("preserve", help="manage reservations using preserve")
