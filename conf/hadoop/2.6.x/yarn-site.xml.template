@@ -57,6 +57,10 @@
 		<name>yarn.log-aggregation-enable</name>
 		<value>__LOG_AGGREGATION__</value>
 	</property>
+	<property>
+		<name>yarn.nodemanager.log-dirs</name>
+		<value>__USERLOGS_DIR__</value>
+	</property>
 
 </configuration>
 
