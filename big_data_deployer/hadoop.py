@@ -9,16 +9,19 @@ import re
 
 _SETTING_JAVA_HOME = "java_home"
 _SETTING_YARN_MB = "yarn_memory_mb"
+_SETTING_YARN_CORES = "yarn_cores"
 _SETTING_LOG_AGGREGATION = "log_aggregation"
 _SETTING_USERLOGS_DIR = "userlogs_dir"
 _ALL_SETTINGS = [
     (_SETTING_JAVA_HOME, "value of JAVA_HOME to deploy Hadoop with"),
     (_SETTING_YARN_MB, "memory available per node to YARN in MB"),
+    (_SETTING_YARN_CORES, "cores available per node to YARN"),
     (_SETTING_LOG_AGGREGATION, "enable YARN log aggregation"),
     (_SETTING_USERLOGS_DIR, "directory to store YARN application logs")
 ]
 
 _DEFAULT_YARN_MB = 4096
+_DEFAULT_YARN_CORES = 8
 _DEFAULT_LOG_AGGREGATION = False
 _DEFAULT_USERLOGS_DIR = "${yarn.log.dir}/userlogs"
 
@@ -49,6 +52,7 @@ class HadoopFramework(Framework):
 
         # Extract settings
         yarn_mb = settings.pop(_SETTING_YARN_MB, _DEFAULT_YARN_MB)
+        yarn_cores = settings.pop(_SETTING_YARN_CORES, _DEFAULT_YARN_CORES)
         java_home = settings.pop(_SETTING_JAVA_HOME)
         log_aggregation_str = str(settings.pop(_SETTING_LOG_AGGREGATION, _DEFAULT_LOG_AGGREGATION)).lower()
         log_aggregation = log_aggregation_str in ['true', 't', 'yes', 'y', '1']
@@ -63,6 +67,7 @@ class HadoopFramework(Framework):
             "__USER__": os.environ["USER"],
             "__MASTER__": master,
             "__YARN_MB__": str(yarn_mb),
+            "__YARN_CORES__": str(yarn_cores),
             "__LOG_AGGREGATION__": "true" if log_aggregation else "false",
             "__USERLOGS_DIR__": userlogs_dir
         }
