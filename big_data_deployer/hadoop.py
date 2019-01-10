@@ -8,18 +8,24 @@ import os.path
 import re
 
 _SETTING_JAVA_HOME = "java_home"
+_SETTING_HDFS_ENABLE = "hdfs_enable"
+_SETTING_YARN_ENABLE = "yarn_enable"
 _SETTING_YARN_MB = "yarn_memory_mb"
 _SETTING_YARN_CORES = "yarn_cores"
 _SETTING_LOG_AGGREGATION = "log_aggregation"
 _SETTING_USERLOGS_DIR = "userlogs_dir"
 _ALL_SETTINGS = [
     (_SETTING_JAVA_HOME, "value of JAVA_HOME to deploy Hadoop with"),
+    (_SETTING_HDFS_ENABLE, "deploy Hadoop's HDFS"),
+    (_SETTING_YARN_ENABLE, "deploy Hadoop's YARN"),
     (_SETTING_YARN_MB, "memory available per node to YARN in MB"),
     (_SETTING_YARN_CORES, "cores available per node to YARN"),
     (_SETTING_LOG_AGGREGATION, "enable YARN log aggregation"),
     (_SETTING_USERLOGS_DIR, "directory to store YARN application logs")
 ]
 
+_DEFAULT_HDFS_ENABLE = True
+_DEFAULT_YARN_ENABLE = True
 _DEFAULT_YARN_MB = 4096
 _DEFAULT_YARN_CORES = 8
 _DEFAULT_LOG_AGGREGATION = False
@@ -43,14 +49,11 @@ class HadoopFramework(Framework):
         if len(machines) < 2:
             raise util.InvalidSetupError("Hadoop requires at least two machines: a master and at least one worker.")
 
-        master = machines[0]
-        workers = machines[1:]
-        log_fn(0, "Selected Hadoop master \"%s\", with %d workers." % (master, len(workers)))
-
-        # Ensure that HADOOP_HOME is an absolute path
-        hadoop_home = os.path.realpath(hadoop_home)
-
         # Extract settings
+        hdfs_enable_str = str(settings.pop(_SETTING_HDFS_ENABLE, _DEFAULT_HDFS_ENABLE)).lower()
+        hdfs_enable = hdfs_enable_str in ['true', 't', 'yes', 'y', '1']
+        yarn_enable_str = str(settings.pop(_SETTING_YARN_ENABLE, _DEFAULT_YARN_ENABLE)).lower()
+        yarn_enable = yarn_enable_str in ['true', 't', 'yes', 'y', '1']
         yarn_mb = settings.pop(_SETTING_YARN_MB, _DEFAULT_YARN_MB)
         yarn_cores = settings.pop(_SETTING_YARN_CORES, _DEFAULT_YARN_CORES)
         java_home = settings.pop(_SETTING_JAVA_HOME)
@@ -59,6 +62,16 @@ class HadoopFramework(Framework):
         userlogs_dir = settings.pop(_SETTING_USERLOGS_DIR, _DEFAULT_USERLOGS_DIR)
         if len(settings) > 0:
             raise util.InvalidSetupError("Found unknown settings for Hadoop: '%s'" % "','".join(settings.keys()))
+        if not hdfs_enable and not yarn_enable:
+            raise util.InvalidSetupError("At least one of HDFS and YARN must be deployed.")
+
+        # Select master and workers
+        master = machines[0]
+        workers = machines[1:]
+        log_fn(0, "Deploying Hadoop master \"%s\", with %d workers." % (master, len(workers)))
+
+        # Ensure that HADOOP_HOME is an absolute path
+        hadoop_home = os.path.realpath(hadoop_home)
 
         # Generate configuration files using the included templates
         template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "hadoop", framework_version.template_dir)
@@ -107,15 +120,17 @@ class HadoopFramework(Framework):
         log_fn(2, "Clean environment set up.")
 
         # Start HDFS
-        log_fn(1, "Deploying HDFS...")
-        log_fn(2, "Formatting namenode...")
-        util.execute_command_quietly(['ssh', master, '"%s/bin/hadoop" namenode -format' % hadoop_home])
-        log_fn(2, "Starting HDFS...")
-        util.execute_command_quietly(['ssh', master, '"%s/sbin/start-dfs.sh"' % hadoop_home])
+        if hdfs_enable:
+            log_fn(1, "Deploying HDFS...")
+            log_fn(2, "Formatting namenode...")
+            util.execute_command_quietly(['ssh', master, '"%s/bin/hadoop" namenode -format' % hadoop_home])
+            log_fn(2, "Starting HDFS...")
+            util.execute_command_quietly(['ssh', master, '"%s/sbin/start-dfs.sh"' % hadoop_home])
 
         # Start YARN
-        log_fn(1, "Deploying YARN...")
-        util.execute_command_quietly(['ssh', master, '"%s/sbin/start-yarn.sh"' % hadoop_home])
+        if yarn_enable:
+            log_fn(1, "Deploying YARN...")
+            util.execute_command_quietly(['ssh', master, '"%s/sbin/start-yarn.sh"' % hadoop_home])
 
         log_fn(1, "Hadoop cluster deployed.")
 
