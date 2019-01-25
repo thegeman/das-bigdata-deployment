@@ -7,13 +7,16 @@ import glob
 import os.path
 import re
 
+_SETTING_WORKER_INSTANCES = "worker_instances"
 _SETTING_WORKER_CORES = "worker_cores"
 _SETTING_WORKER_MEMORY = "worker_memory"
 _ALL_SETTINGS = [
-    (_SETTING_WORKER_CORES, "cores available per node to Spark"),
-    (_SETTING_WORKER_MEMORY, "memory available per node to spark")
+    (_SETTING_WORKER_INSTANCES, "worker instances to launch per node"),
+    (_SETTING_WORKER_CORES, "cores available per worker instance to Spark"),
+    (_SETTING_WORKER_MEMORY, "memory available per worker instance to spark")
 ]
 
+_DEFAULT_WORKER_INSTANCES = 1
 _DEFAULT_WORKER_CORES = 1
 _DEFAULT_WORKER_MEMORY = "1g"
 
@@ -36,6 +39,7 @@ class SparkFramework(Framework):
             raise util.InvalidSetupError("Spark requires at least two machines: a master and at least one worker.")
 
         # Extract settings
+        worker_instances = str(settings.pop(_SETTING_WORKER_INSTANCES, _DEFAULT_WORKER_INSTANCES))
         worker_cores = str(settings.pop(_SETTING_WORKER_CORES, _DEFAULT_WORKER_CORES))
         worker_memory = str(settings.pop(_SETTING_WORKER_MEMORY, _DEFAULT_WORKER_MEMORY))
         if len(settings) > 0:
@@ -55,6 +59,7 @@ class SparkFramework(Framework):
         substitutions = {
             "__USER__": os.environ["USER"],
             "__MASTER__": master,
+            "__WORKER_INSTANCES__": worker_instances,
             "__WORKER_CORES__": worker_cores,
             "__WORKER_MEMORY__": worker_memory
         }
