@@ -8,6 +8,16 @@ import glob
 import os
 import re
 
+_SETTING_HTTP_PORT = "http_port"
+_SETTING_RPC_PORT = "rpc_port"
+_ALL_SETTINGS = [
+    (_SETTING_HTTP_PORT, "port to bind InfluxDB HTTP interface to"),
+    (_SETTING_RPC_PORT, "port to bind InfluxDB RPC interface to")
+]
+
+_DEFAULT_HTTP_PORT = 8086
+_DEFAULT_RPC_PORT = 8088
+
 class InfluxDBFrameworkVersion(FrameworkVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
         super(InfluxDBFrameworkVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
@@ -26,7 +36,9 @@ class InfluxDBFramework(Framework):
         if len(machines) < 1:
             raise util.InvalidSetupError("InfluxDB requires at least one machine to run on.")
 
-        # Extract settings -- InfluxDB currently has no settings
+        # Extract settings
+        http_port = settings.pop(_SETTING_HTTP_PORT, _DEFAULT_HTTP_PORT)
+        rpc_port = settings.pop(_SETTING_RPC_PORT, _DEFAULT_RPC_PORT)
         if len(settings) > 0:
             raise util.InvalidSetupError("Found unknown settings for InfluxDB: '%s'" % "','".join(settings.keys()))
 
@@ -49,6 +61,8 @@ class InfluxDBFramework(Framework):
         substitutions = {
             "__USER__": os.environ["USER"],
             "__HOST__": master,
+            "__HTTP_PORT__": str(http_port),
+            "__RPC_PORT__": str(rpc_port),
             "__HOME_DIR__": influxdb_home,
             "__DATA_DIR__": "/local/%s/influxdb" % os.environ["USER"]
         }
@@ -81,10 +95,10 @@ class InfluxDBFramework(Framework):
         log_fn(1, "Starting InfluxDB daemon...")
         util.execute_command_quietly(['ssh', master, '"%s/sbin/start-influxdb"' % influxdb_home])
 
-        log_fn(1, 'InfluxDB is now listening on "%s:8086".' % master)
+        log_fn(1, 'InfluxDB is now listening on "%s:%s" (HTTP) and "%s:%s" (RPC).' % (master, http_port, master, rpc_port))
 
     def get_supported_deployment_settings(self, framework_version):
-        return []
+        return _ALL_SETTINGS
 
 get_framework_registry().register_framework(InfluxDBFramework())
 get_framework_registry().framework("influxdb").add_version(InfluxDBFrameworkVersion("1.7.3", "https://dl.influxdata.com/influxdb/releases/influxdb-1.7.3_linux_amd64.tar.gz", "tar.gz", "influxdb-1.7.3-1", "1.7.x"))

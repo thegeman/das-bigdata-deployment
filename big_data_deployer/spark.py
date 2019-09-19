@@ -72,6 +72,9 @@ class SparkFramework(Framework):
             with open(template_file, "r") as template_in, open(os.path.join(config_dir, template_filename), "w") as config_out:
                 for line in template_in:
                     print(substitutions_pattern.sub(lambda m: substitutions[m.group(0)], line.rstrip()), file=config_out)
+        log_fn(2, "Generating file \"master\"...")
+        with open(os.path.join(config_dir, "master"), "w") as master_file:
+            print(master, file=master_file)
         log_fn(2, "Generating file \"slaves\"...")
         with open(os.path.join(config_dir, "slaves"), "w") as slaves_file:
             for worker in workers:

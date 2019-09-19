@@ -13,7 +13,7 @@ reporting-disabled = true
 
 # Bind address to use for the RPC service for backup and restore.
 hostname = "__HOST__"
-bind-address = ":8088"
+bind-address = ":__RPC_PORT__"
 
 ###
 ### [meta]
@@ -240,7 +240,7 @@ bind-address = ":8088"
   # flux-log-enabled = false
 
   # The bind address used by the HTTP service.
-  bind-address = ":8086"
+  bind-address = ":__HTTP_PORT__"
 
   # Determines whether user authentication is enabled over HTTP/HTTPS.
   # auth-enabled = false

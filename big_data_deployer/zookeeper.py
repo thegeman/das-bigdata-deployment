@@ -71,4 +71,4 @@ class ZookeeperFramework(Framework):
         return []
 
 get_framework_registry().register_framework(ZookeeperFramework())
-get_framework_registry().framework("zookeeper").add_version(ZookeeperFrameworkVersion("3.4.8", "http://ftp.tudelft.nl/apache/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz", "tar.gz", "zookeeper-3.4.8", "3.4.x"))
+get_framework_registry().framework("zookeeper").add_version(ZookeeperFrameworkVersion("3.4.8", "https://archive.apache.org/dist/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz", "tar.gz", "zookeeper-3.4.8", "3.4.x"))

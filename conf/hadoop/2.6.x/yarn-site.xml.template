@@ -65,6 +65,10 @@
 		<name>yarn.nodemanager.log-dirs</name>
 		<value>__USERLOGS_DIR__</value>
 	</property>
+	<property>
+		<name>yarn.nodemanager.log.retain-seconds</name>
+		<value>2000000000</value>
+	</property>
 
 </configuration>
 
