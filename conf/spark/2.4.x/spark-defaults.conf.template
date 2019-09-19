@@ -26,7 +26,14 @@
 # spark.driver.memory              5g
 # spark.executor.extraJavaOptions  -XX:+PrintGCDetails -Dkey=value -Dnumbers="one two three"
 
-spark.master					spark://__MASTER__:7077
-spark.sql.warehouse.dir			/local/__USER__/spark/sql_warehouse/
-spark.executor.extraJavaOptions	-Dderby.system.home=/local/__USER__/spark/derby/
+# General cluster settings
+spark.master                     spark://__MASTER__:7077
+spark.driver.memory              50g
+spark.executor.instances         __WORKER_INSTANCES__
+spark.executor.cores             __WORKER_CORES__
+spark.executor.memory            __WORKER_MEMORY__
+
+# Spark SQL settings
+spark.sql.warehouse.dir          /local/__USER__/spark/sql_warehouse/
+spark.executor.extraJavaOptions  -Dderby.system.home=/local/__USER__/spark/derby/
 
