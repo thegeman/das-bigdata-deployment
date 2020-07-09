@@ -139,3 +139,4 @@ class HadoopFramework(Framework):
 
 get_framework_registry().register_framework(HadoopFramework())
 get_framework_registry().framework("hadoop").add_version(HadoopFrameworkVersion("2.6.0", "https://archive.apache.org/dist/hadoop/core/hadoop-2.6.0/hadoop-2.6.0.tar.gz", "tar.gz", "hadoop-2.6.0", "2.6.x"))
+get_framework_registry().framework("hadoop").add_version(HadoopFrameworkVersion("2.7.7", "https://archive.apache.org/dist/hadoop/core/hadoop-2.7.7/hadoop-2.7.7.tar.gz", "tar.gz", "hadoop-2.7.7", "2.6.x"))
