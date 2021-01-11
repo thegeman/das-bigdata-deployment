@@ -53,6 +53,12 @@ class PreserveReservation:
     def assigned_machines(self):
         return self.__assigned_machines
 
+def _parse_int_or_default(value, default_value):
+    try:
+        return int(value)
+    except ValueError:
+        return default_value
+
 def PreserveReservation_from_preserve_line(line):
     parts = line.split()
     return PreserveReservation(
@@ -61,7 +67,7 @@ def PreserveReservation_from_preserve_line(line):
             start_time="%s %s" % (parts[2], parts[3]),
             end_time="%s %s" % (parts[4], parts[5]),
             state=parts[6],
-            num_machines=int(parts[7]),
+            num_machines=_parse_int_or_default(parts[7], 0),
             assigned_machines=sorted(["%s.ib.cluster" % part for part in parts[8:]])
         )
 
