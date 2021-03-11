@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 
 from __future__ import print_function
+
 from . import *
 from . import preserve
+from . import conda
+
 import argparse
 import os.path
 import sys
@@ -19,6 +22,7 @@ def parse_arguments():
     add_install_subparser(subparsers)
     add_deploy_subparser(subparsers)
     preserve.add_preserve_subparser(subparsers)
+    conda.add_conda_subparser(subparsers)
 
     return parser.parse_args()
 
@@ -49,19 +53,18 @@ def add_deploy_subparser(parser):
 def list_frameworks(args):
     print("Supported frameworks:")
     if args.versions:
-        for framework_ident, framework in sorted(get_framework_registry().frameworks.iteritems()):
+        for framework_ident, framework in sorted(get_package_registry().packages.iteritems()):
             for version in sorted(framework.versions):
                 print("%s %s" % (framework_ident, version))
     else:
-        for framework_ident in sorted(get_framework_registry().frameworks):
+        for framework_ident in sorted(get_package_registry().packages):
             print(framework_ident)
 
 def install_framework(args):
-    fm = FrameworkManager(get_framework_registry(), args.framework_dir)
-    fm.install(args.FRAMEWORK, args.VERSION, force_reinstall=args.reinstall)
+    print("Installing frameworks is deprecated and now happens on first use.")
 
 def deploy_framework(args):
-    fm = FrameworkManager(get_framework_registry(), args.framework_dir)
+    fm = PackageManager(get_package_registry(), args.framework_dir)
     if args.list_settings:
         supported_settings = fm.get_supported_deployment_settings(args.FRAMEWORK, args.VERSION)
         if supported_settings:
@@ -93,7 +96,7 @@ def deploy_framework(args):
             settings[key_value[0].strip()] = key_value[1].strip()
 
         # Deploy the framework
-        fm.deploy(args.FRAMEWORK, args.VERSION, machines, settings)
+        fm.deploy(args.FRAMEWORK, args.VERSION, reservation.reservation_id, machines, settings)
 
 def main():
     args = parse_arguments()

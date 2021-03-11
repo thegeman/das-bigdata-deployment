@@ -103,7 +103,7 @@ class PreserveManager:
         # Invoke preserve to make the reservation
         reservation_output = util.execute_command_for_output(["preserve", "-np", str(num_machines), "-t", time])
 
-        # Extract the reservation ID 
+        # Extract the reservation ID
         reservation_id = None
         for line in reservation_output.split('\n'):
             if line.startswith("Reservation number"):
@@ -115,7 +115,7 @@ class PreserveManager:
         return int(reservation_id)
 
     def fetch_reservation(self, reservation_id):
-        if reservation_id.upper() == "LAST":
+        if str(reservation_id).upper() == "LAST":
             reservations = self.get_own_reservations()
             if len(reservations) == 0:
                 raise ReservationNotFoundException("Could not retrieve last reservation; no reservations were found.")
@@ -126,7 +126,7 @@ class PreserveManager:
             if not int(reservation_id) in reservations:
                 raise ReservationNotFoundException('Could not find reservation for id "%s".' % reservation_id)
             return reservations[int(reservation_id)]
-    
+
     def kill_reservation(self, reservation_id):
         reservation = self.fetch_reservation(reservation_id)
         if not reservation.username == self.username:
@@ -136,7 +136,7 @@ class PreserveManager:
 def add_preserve_subparser(parser):
     preserve_parser = parser.add_parser("preserve", help="manage reservations using preserve")
     preserve_subparsers = preserve_parser.add_subparsers(title="Reservation management commands")
-    
+
     # Add subparser for "create-reservation" command
     create_parser = preserve_subparsers.add_parser("create-reservation", help="reserve machines")
     create_parser.add_argument("-t", "--time", help="time to reserve machines for as [[hh:]mm:]ss (default: %s)" % DEFAULT_TIME, action="store", default=DEFAULT_TIME)

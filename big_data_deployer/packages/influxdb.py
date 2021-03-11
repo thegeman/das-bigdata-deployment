@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 
 from __future__ import print_function
-from .frameworkmanager import Framework, FrameworkVersion, FrameworkRegistry, get_framework_registry
-from . import util
+
+from ..package import PackageRegistry, get_package_registry
+from ..nativepackage import NativePackage, NativePackageVersion
+from .. import util
+
 import fnmatch
 import glob
 import os
@@ -18,20 +21,20 @@ _ALL_SETTINGS = [
 _DEFAULT_HTTP_PORT = 8086
 _DEFAULT_RPC_PORT = 8088
 
-class InfluxDBFrameworkVersion(FrameworkVersion):
+class InfluxDBPackageVersion(NativePackageVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
-        super(InfluxDBFrameworkVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
+        super(InfluxDBPackageVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
         self.__template_dir = template_dir
 
     @property
     def template_dir(self):
         return self.__template_dir
 
-class InfluxDBFramework(Framework):
+class InfluxDBPackage(NativePackage):
     def __init__(self):
-        super(InfluxDBFramework, self).__init__("influxdb", "InfluxDB")
+        super(InfluxDBPackage, self).__init__("influxdb", "InfluxDB")
 
-    def deploy(self, influxdb_home, framework_version, machines, settings, log_fn=util.log):
+    def deploy_installed(self, influxdb_home, package_version, machines, settings, log_fn=util.log):
         """Deploys InfluxDB to a given master node."""
         if len(machines) < 1:
             raise util.InvalidSetupError("InfluxDB requires at least one machine to run on.")
@@ -52,7 +55,7 @@ class InfluxDBFramework(Framework):
         # Generate configuration files using the included templates
         log_fn(1, "Generating configuration files...")
         # - Find template files
-        template_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "influxdb", framework_version.template_dir))
+        template_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "conf", "influxdb", package_version.template_dir))
         template_files = []
         for template_subdir, _, filenames in os.walk(template_dir):
             for filename in fnmatch.filter(filenames, "*.template"):
@@ -97,8 +100,8 @@ class InfluxDBFramework(Framework):
 
         log_fn(1, 'InfluxDB is now listening on "%s:%s" (HTTP) and "%s:%s" (RPC).' % (master, http_port, master, rpc_port))
 
-    def get_supported_deployment_settings(self, framework_version):
+    def get_supported_deployment_settings(self, package_version):
         return _ALL_SETTINGS
 
-get_framework_registry().register_framework(InfluxDBFramework())
-get_framework_registry().framework("influxdb").add_version(InfluxDBFrameworkVersion("1.7.3", "https://dl.influxdata.com/influxdb/releases/influxdb-1.7.3_linux_amd64.tar.gz", "tar.gz", "influxdb-1.7.3-1", "1.7.x"))
+get_package_registry().register_package(InfluxDBPackage())
+get_package_registry().package("influxdb").add_version(InfluxDBPackageVersion("1.7.3", "https://dl.influxdata.com/influxdb/releases/influxdb-1.7.3_linux_amd64.tar.gz", "tar.gz", "influxdb-1.7.3-1", "1.7.x"))

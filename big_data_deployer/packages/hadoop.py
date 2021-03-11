@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 
 from __future__ import print_function
-from .frameworkmanager import Framework, FrameworkVersion, FrameworkRegistry, get_framework_registry
-from . import util
+
+from ..package import PackageRegistry, get_package_registry
+from ..nativepackage import NativePackage, NativePackageVersion
+from .. import util
+
 import glob
 import os.path
 import re
@@ -31,20 +34,20 @@ _DEFAULT_YARN_CORES = 8
 _DEFAULT_LOG_AGGREGATION = False
 _DEFAULT_USERLOGS_DIR = "${yarn.log.dir}/userlogs"
 
-class HadoopFrameworkVersion(FrameworkVersion):
+class HadoopPackageVersion(NativePackageVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
-        super(HadoopFrameworkVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
+        super(HadoopPackageVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
         self.__template_dir = template_dir
 
     @property
     def template_dir(self):
         return self.__template_dir
 
-class HadoopFramework(Framework):
+class HadoopPackage(NativePackage):
     def __init__(self):
-        super(HadoopFramework, self).__init__("hadoop", "Hadoop")
+        super(HadoopPackage, self).__init__("hadoop", "Hadoop")
 
-    def deploy(self, hadoop_home, framework_version, machines, settings, log_fn=util.log):
+    def deploy_installed(self, hadoop_home, package_version, machines, settings, log_fn=util.log):
         """Deploys Hadoop to a given set of workers and a master node."""
         if len(machines) < 2:
             raise util.InvalidSetupError("Hadoop requires at least two machines: a master and at least one worker.")
@@ -74,7 +77,7 @@ class HadoopFramework(Framework):
         hadoop_home = os.path.realpath(hadoop_home)
 
         # Generate configuration files using the included templates
-        template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "hadoop", framework_version.template_dir)
+        template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "conf", "hadoop", package_version.template_dir)
         config_dir = os.path.join(hadoop_home, "etc", "hadoop")
         substitutions = {
             "__USER__": os.environ["USER"],
@@ -134,9 +137,10 @@ class HadoopFramework(Framework):
 
         log_fn(1, "Hadoop cluster deployed.")
 
-    def get_supported_deployment_settings(self, framework_version):
+    def get_supported_deployment_settings(self, package_version):
         return _ALL_SETTINGS
 
-get_framework_registry().register_framework(HadoopFramework())
-get_framework_registry().framework("hadoop").add_version(HadoopFrameworkVersion("2.6.0", "https://archive.apache.org/dist/hadoop/core/hadoop-2.6.0/hadoop-2.6.0.tar.gz", "tar.gz", "hadoop-2.6.0", "2.6.x"))
-get_framework_registry().framework("hadoop").add_version(HadoopFrameworkVersion("2.7.7", "https://archive.apache.org/dist/hadoop/core/hadoop-2.7.7/hadoop-2.7.7.tar.gz", "tar.gz", "hadoop-2.7.7", "2.6.x"))
+get_package_registry().register_package(HadoopPackage())
+get_package_registry().package("hadoop").add_version(HadoopPackageVersion("2.6.0", "https://archive.apache.org/dist/hadoop/core/hadoop-2.6.0/hadoop-2.6.0.tar.gz", "tar.gz", "hadoop-2.6.0", "2.6.x"))
+get_package_registry().package("hadoop").add_version(HadoopPackageVersion("2.7.7", "https://archive.apache.org/dist/hadoop/core/hadoop-2.7.7/hadoop-2.7.7.tar.gz", "tar.gz", "hadoop-2.7.7", "2.6.x"))
+get_package_registry().package("hadoop").add_version(HadoopPackageVersion("3.2.2", "https://archive.apache.org/dist/hadoop/core/hadoop-3.2.2/hadoop-3.2.2.tar.gz", "tar.gz", "hadoop-3.2.2", "2.6.x"))

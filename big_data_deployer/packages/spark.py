@@ -1,8 +1,11 @@
 #!/usr/bin/env python2
 
 from __future__ import print_function
-from .frameworkmanager import Framework, FrameworkVersion, FrameworkRegistry, get_framework_registry
-from . import util
+
+from ..package import PackageRegistry, get_package_registry
+from ..nativepackage import NativePackage, NativePackageVersion
+from .. import util
+
 import glob
 import os.path
 import re
@@ -20,20 +23,20 @@ _DEFAULT_WORKER_INSTANCES = 1
 _DEFAULT_WORKER_CORES = 1
 _DEFAULT_WORKER_MEMORY = "1g"
 
-class SparkFrameworkVersion(FrameworkVersion):
+class SparkPackageVersion(NativePackageVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
-        super(SparkFrameworkVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
+        super(SparkPackageVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
         self.__template_dir = template_dir
 
     @property
     def template_dir(self):
         return self.__template_dir
 
-class SparkFramework(Framework):
+class SparkPackage(NativePackage):
     def __init__(self):
-        super(SparkFramework, self).__init__("spark", "Spark")
+        super(SparkPackage, self).__init__("spark", "Spark")
 
-    def deploy(self, spark_home, framework_version, machines, settings, log_fn=util.log):
+    def deploy_installed(self, spark_home, package_version, machines, settings, log_fn=util.log):
         """Deploys Spark to a given set of workers and a master node."""
         if len(machines) < 2:
             raise util.InvalidSetupError("Spark requires at least two machines: a master and at least one worker.")
@@ -54,7 +57,7 @@ class SparkFramework(Framework):
         spark_home = os.path.realpath(spark_home)
 
         # Generate configuration files using the included templates
-        template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "spark", framework_version.template_dir)
+        template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "conf", "spark", package_version.template_dir)
         config_dir = os.path.join(spark_home, "conf")
         substitutions = {
             "__USER__": os.environ["USER"],
@@ -102,6 +105,6 @@ class SparkFramework(Framework):
 
         log_fn(1, "Spark cluster deployed.")
 
-get_framework_registry().register_framework(SparkFramework())
-get_framework_registry().framework("spark").add_version(SparkFrameworkVersion("2.4.0", "https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.6.tgz", "tgz", "spark-2.4.0-bin-hadoop2.6", "2.4.x"))
-get_framework_registry().framework("spark").add_version(SparkFrameworkVersion("3.0.0", "https://archive.apache.org/dist/spark/spark-3.0.0/spark-3.0.0-bin-hadoop2.7.tgz", "tgz", "spark-3.0.0-bin-hadoop2.7", "2.4.x"))
+get_package_registry().register_package(SparkPackage())
+get_package_registry().package("spark").add_version(SparkPackageVersion("2.4.0", "https://archive.apache.org/dist/spark/spark-2.4.0/spark-2.4.0-bin-hadoop2.6.tgz", "tgz", "spark-2.4.0-bin-hadoop2.6", "2.4.x"))
+get_package_registry().package("spark").add_version(SparkPackageVersion("3.1.1", "https://archive.apache.org/dist/spark/spark-3.1.1/spark-3.1.1-bin-hadoop3.2.tgz", "tgz", "spark-3.1.1-bin-hadoop3.2", "2.4.x"))

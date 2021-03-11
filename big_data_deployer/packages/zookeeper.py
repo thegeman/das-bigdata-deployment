@@ -1,26 +1,29 @@
 #!/usr/bin/env python2
 
 from __future__ import print_function
-from .frameworkmanager import Framework, FrameworkVersion, FrameworkRegistry, get_framework_registry
-from . import util
+
+from ..package import PackageRegistry, get_package_registry
+from ..nativepackage import NativePackage, NativePackageVersion
+from .. import util
+
 import glob
 import os.path
 import re
 
-class ZookeeperFrameworkVersion(FrameworkVersion):
+class ZookeeperPackageVersion(NativePackageVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
-        super(ZookeeperFrameworkVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
+        super(ZookeeperPackageVersion, self).__init__(version, archive_url, archive_extension, archive_root_dir)
         self.__template_dir = template_dir
 
     @property
     def template_dir(self):
         return self.__template_dir
 
-class ZookeeperFramework(Framework):
+class ZookeeperPackage(NativePackage):
     def __init__(self):
-        super(ZookeeperFramework, self).__init__("zookeeper", "ZooKeeper")
+        super(ZookeeperPackage, self).__init__("zookeeper", "ZooKeeper")
 
-    def deploy(self, zookeeper_home, framework_version, machines, settings, log_fn=util.log):
+    def deploy(self, zookeeper_home, package_version, machines, settings, log_fn=util.log):
         """Deploys ZooKeeper to a given master node."""
         if len(machines) < 1:
             raise util.InvalidSetupError("ZooKeeper requires at least one machine to run on.")
@@ -36,7 +39,7 @@ class ZookeeperFramework(Framework):
             raise util.InvalidSetupError("Found unknown settings for ZooKeeper: '%s'" % "','".join(settings.keys()))
 
         # Generate configuration files using the included templates
-        template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "..", "conf", "zookeeper", framework_version.template_dir)
+        template_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), "conf", "zookeeper", package_version.template_dir)
         config_dir = os.path.join(zookeeper_home, "conf")
         substitutions = {
             "__USER__": os.environ["USER"],
@@ -67,8 +70,8 @@ class ZookeeperFramework(Framework):
 
         log_fn(1, 'ZooKeeper is now listening on "%s:2181".' % master)
 
-    def get_supported_deployment_settings(self, framework_version):
+    def get_supported_deployment_settings(self, package_version):
         return []
 
-get_framework_registry().register_framework(ZookeeperFramework())
-get_framework_registry().framework("zookeeper").add_version(ZookeeperFrameworkVersion("3.4.8", "https://archive.apache.org/dist/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz", "tar.gz", "zookeeper-3.4.8", "3.4.x"))
+get_package_registry().register_package(ZookeeperPackage())
+get_package_registry().package("zookeeper").add_version(ZookeeperPackageVersion("3.4.8", "https://archive.apache.org/dist/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz", "tar.gz", "zookeeper-3.4.8", "3.4.x"))
