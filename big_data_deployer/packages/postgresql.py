@@ -15,8 +15,8 @@ _ALL_SETTINGS = [
 ]
 
 class PostgreSQLPackageVersion(CondaPackageVersion):
-    def __init__(self, version, conda_packages, conda_channels, template_dir):
-        super(PostgreSQLPackageVersion, self).__init__(version, conda_packages, conda_channels)
+    def __init__(self, version, conda_packages = [], conda_channels = [], pip_packages = [], template_dir = ""):
+        super(PostgreSQLPackageVersion, self).__init__(version, conda_packages, conda_channels, pip_packages)
         self.__template_dir = template_dir
 
     @property

@@ -101,10 +101,16 @@ class HadoopPackage(NativePackage):
         log_fn(2, "Generating file \"masters\"...")
         with open(os.path.join(config_dir, "masters"), "w") as masters_file:
             print(master, file=masters_file)
-        log_fn(2, "Generating file \"slaves\"...")
-        with open(os.path.join(config_dir, "slaves"), "w") as slaves_file:
-            for worker in workers:
-                print(worker, file=slaves_file)
+        if package_version.version.startswith("2"):
+            log_fn(2, "Generating file \"slaves\"...")
+            with open(os.path.join(config_dir, "slaves"), "w") as slaves_file:
+                for worker in workers:
+                    print(worker, file=slaves_file)
+        else:
+            log_fn(2, "Generating file \"workers\"...")
+            with open(os.path.join(config_dir, "workers"), "w") as workers_file:
+                for worker in workers:
+                    print(worker, file=workers_file)
         log_fn(2, "Configuration files generated.")
 
         # Clean up previous Hadoop deployments

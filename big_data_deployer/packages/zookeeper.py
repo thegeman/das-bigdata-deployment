@@ -23,7 +23,7 @@ class ZookeeperPackage(NativePackage):
     def __init__(self):
         super(ZookeeperPackage, self).__init__("zookeeper", "ZooKeeper")
 
-    def deploy(self, zookeeper_home, package_version, machines, settings, log_fn=util.log):
+    def deploy_installed(self, zookeeper_home, package_version, machines, settings, log_fn=util.log):
         """Deploys ZooKeeper to a given master node."""
         if len(machines) < 1:
             raise util.InvalidSetupError("ZooKeeper requires at least one machine to run on.")
