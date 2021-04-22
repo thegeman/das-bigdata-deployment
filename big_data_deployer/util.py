@@ -45,6 +45,7 @@ def write_remote_file(machine, filename, file_contents, file_permissions=None):
         cat_proc = subprocess.Popen(ssh_command, stdin=subprocess.PIPE, stdout=devnull, stderr=devnull)
         cat_proc.stdin.write(file_contents)
         cat_proc.stdin.close()
+        cat_proc.wait()
     if file_permissions is not None:
         file_permissions_str = oct(file_permissions).zfill(4)
         execute_command(["ssh", machine, "chmod %s %s" % (file_permissions_str, pipes.quote(filename))])

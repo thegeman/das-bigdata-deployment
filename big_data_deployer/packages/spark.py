@@ -13,15 +13,18 @@ import re
 _SETTING_WORKER_INSTANCES = "worker_instances"
 _SETTING_WORKER_CORES = "worker_cores"
 _SETTING_WORKER_MEMORY = "worker_memory"
+_SETTING_PRELOAD_SCRIPT = "preload_script"
 _ALL_SETTINGS = [
     (_SETTING_WORKER_INSTANCES, "worker instances to launch per node"),
     (_SETTING_WORKER_CORES, "cores available per worker instance to Spark"),
-    (_SETTING_WORKER_MEMORY, "memory available per worker instance to spark")
+    (_SETTING_WORKER_MEMORY, "memory available per worker instance to Spark"),
+    (_SETTING_PRELOAD_SCRIPT, "script to run before any Spark command to set up environment")
 ]
 
 _DEFAULT_WORKER_INSTANCES = 1
 _DEFAULT_WORKER_CORES = 1
 _DEFAULT_WORKER_MEMORY = "1g"
+_DEFAULT_PRELOAD_SCRIPT = ""
 
 class SparkPackageVersion(NativePackageVersion):
     def __init__(self, version, archive_url, archive_extension, archive_root_dir, template_dir):
@@ -45,6 +48,7 @@ class SparkPackage(NativePackage):
         worker_instances = str(settings.pop(_SETTING_WORKER_INSTANCES, _DEFAULT_WORKER_INSTANCES))
         worker_cores = str(settings.pop(_SETTING_WORKER_CORES, _DEFAULT_WORKER_CORES))
         worker_memory = str(settings.pop(_SETTING_WORKER_MEMORY, _DEFAULT_WORKER_MEMORY))
+        preload_script = str(settings.pop(_SETTING_PRELOAD_SCRIPT, _DEFAULT_PRELOAD_SCRIPT))
         if len(settings) > 0:
             raise util.InvalidSetupError("Found unknown settings for Spark: '%s'" % "','".join(settings.keys()))
 
@@ -64,7 +68,8 @@ class SparkPackage(NativePackage):
             "__MASTER__": master,
             "__WORKER_INSTANCES__": worker_instances,
             "__WORKER_CORES__": worker_cores,
-            "__WORKER_MEMORY__": worker_memory
+            "__WORKER_MEMORY__": worker_memory,
+            "__PRELOAD_CMD__": ". %s" % preload_script if preload_script else ""
         }
         substitutions_pattern = re.compile("|".join([re.escape(k) for k in substitutions.keys()]))
         # Iterate over template files and apply substitutions

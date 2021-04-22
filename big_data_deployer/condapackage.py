@@ -44,14 +44,18 @@ class CondaPackage(Package):
 
     def  __install_conda_package(self, conda_env, package, package_version, log_fn=util.log):
         log_fn(0, "Installing Conda package and dependencies for %s version %s..." % (package.name, package_version.version))
-        conda_env.install(package_version.conda_packages, package_version.conda_channels)
+        if package_version.conda_packages:
+            conda_env.install(package_version.conda_packages, package_version.conda_channels)
+        if package_version.pip_packages:
+            conda_env.pip_install(package_version.pip_packages)
         log_fn(1, "Installation completed.")
 
 class CondaPackageVersion(PackageVersion):
-    def __init__(self, version, conda_packages, conda_channels=[]):
+    def __init__(self, version, conda_packages=[], conda_channels=[], pip_packages=[]):
         super(CondaPackageVersion, self).__init__(version)
         self.__conda_packages = [conda_packages] if isinstance(conda_packages, str) else conda_packages
         self.__conda_channels = [conda_channels] if isinstance(conda_channels, str) else conda_channels
+        self.__pip_packages = [pip_packages] if isinstance(pip_packages, str) else pip_packages
 
     @property
     def conda_packages(self):
@@ -60,6 +64,10 @@ class CondaPackageVersion(PackageVersion):
     @property
     def conda_channels(self):
         return self.__conda_channels
+
+    @property
+    def pip_packages(self):
+        return self.__pip_packages
 
     def __repr__(self):
         return self.version

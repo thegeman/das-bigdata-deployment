@@ -39,13 +39,20 @@ class CondaEnv:
         command_line = "ssh %s conda activate %s \"&&\" %s" % (machine, pipes.quote(self.root), command_line)
         util.execute_command(command_line, verbose=verbose, shell=True)
 
-    def create(self, python_version=None, pip_version=None, verbose=False):
+    def create(self, python_version="3.7.10", pip_version=None, verbose=False, channels=["conda-forge"]):
+        # Create the Conda environment
         if os.path.exists(self.root):
             raise Error("Cannot create Conda environment. Path '%s' already exists." % self.root)
-        command_line = ["conda", "create", "-y", "--prefix", self.root,
-            "python=%s" % python_version if python_version else "python",
-            "pip=%s" % pip_version if pip_version else "pip"]
+        command_line = ["conda", "create", "-y", "--prefix", self.root]
+        for channel in channels:
+            command_line.append("--channel")
+            command_line.append(channel)
+        command_line.append("python=%s" % python_version if python_version else "python")
+        command_line.append("pip=%s" % pip_version if pip_version else "pip")
         util.execute_command(command_line, verbose=verbose)
+        # Configure the default channels
+        for channel in channels:
+            self.command(["conda", "config", "--prepend", "channels", channel], verbose=False)
 
     def install(self, packages, channels=[], verbose=False):
         command_line = ["conda", "install", "-y"]
@@ -78,6 +85,7 @@ def add_conda_subparser(parser):
     # Add subparser for "create" command
     conda_create_parser = conda_subparsers.add_parser("create", help="create a Conda environment")
     conda_create_parser.add_argument("-v", "--verbose", help="show the output of the Conda command", action="store_true")
+    conda_create_parser.add_argument("-c", "--channel", help="additional Conda channel to install from", action="append", default=["conda-forge"])
     conda_create_parser.add_argument("--python", help="Python version to install", action="store", default="3.7.10")
     conda_create_parser.add_argument("--pip", help="Pip version to install", action="store", default="21.0.1")
     conda_create_parser.set_defaults(func=__create)
@@ -86,6 +94,10 @@ def add_conda_subparser(parser):
     conda_get_activate_parser = conda_subparsers.add_parser("get-activate-command", help="prints command to activate the Conda environment")
     conda_get_activate_parser.add_argument("-q", "--quiet", help="output the command without additional explanation for humans", action="store_true")
     conda_get_activate_parser.set_defaults(func=__get_activate_command)
+
+    # Add subparser for "get-conda-directory" command
+    conda_get_directory_parser = conda_subparsers.add_parser("get-conda-directory", help="prints path of Conda environment's root directory")
+    conda_get_directory_parser.set_defaults(func=__get_directory)
 
     # Add subparser for "install" command
     conda_install_parser = conda_subparsers.add_parser("install", help="install Conda packages")
@@ -109,7 +121,9 @@ def __create(args):
         print("Conda environment at '%s' already exists." % conda_env.root)
         return
 
-    conda_env.create(python_version=args.python, pip_version=args.pip, verbose=args.verbose)
+    print("Creating Conda environment...")
+
+    conda_env.create(python_version=args.python, pip_version=args.pip, verbose=args.verbose, channels=args.channel)
 
     print("Conda environment created at '%s'." % conda_env.root)
     print("Activate the environment using '%s'." % __format_activate_str(conda_env.root))
@@ -125,10 +139,20 @@ def __get_activate_command(args):
     else:
         print("Activate the environment using '%s'." % activate_str)
 
+def __get_directory(args):
+    conda_env = get_conda_env(args.preserve_id, args.framework_dir)
+    if not conda_env.exists():
+        raise Error("Conda environment has not yet been created at '%s'." % conda_env.root)
+    print(conda_env.root)
+
 def __install(args):
     conda_env = get_conda_env(args.preserve_id, args.framework_dir)
+    if not conda_env.exists():
+        raise Error("Conda environment has not yet been created at '%s'." % conda_env.root)
     conda_env.install(args.packages, args.channel, verbose=args.verbose)
 
 def __pip_install(args):
     conda_env = get_conda_env(args.preserve_id, args.framework_dir)
+    if not conda_env.exists():
+        raise Error("Conda environment has not yet been created at '%s'." % conda_env.root)
     conda_env.pip_install(args.packages, verbose=args.verbose)
