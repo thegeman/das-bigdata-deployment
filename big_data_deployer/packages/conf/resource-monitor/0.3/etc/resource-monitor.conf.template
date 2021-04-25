@@ -1,0 +1,13 @@
+# Configuration for starting resource monitor daemons in a cluster
+
+# Set of machines to monitor, space-separated (required)
+MACHINES="__MACHINES__"
+
+# Directory to store metrics in on each machine (optional)
+METRIC_DIR="/local/__USER__/resource-monitor/metrics/"
+
+# Log file for daemon on each machine, '\$(hostname)' is substituted (optional)
+LOG_FILE="/local/__USER__/resource-monitor/logs/resource-monitor-\$(hostname).log"
+
+# PID file for daemon on each machine (optional)
+PID_FILE="/local/__USER__/resource-monitor/resource-monitor.pid"
