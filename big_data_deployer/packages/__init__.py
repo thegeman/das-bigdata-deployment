@@ -6,5 +6,6 @@ import hadoop
 import influxdb
 import kafka
 import postgresql
+import resource_monitor
 import spark
 import zookeeper
