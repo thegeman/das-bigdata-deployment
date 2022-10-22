@@ -119,7 +119,26 @@ def _try_install_native_package(package_dir, package, package_version, log_fn=ut
         raise InstallFailedError("Failed to create temporary directory to extract %s with unknown error: %s." % (package.name, e))
     try:
         with tarfile.open(_archive_file(package_dir, package, package_version)) as archive_tar:
-            archive_tar.extractall(extract_tmp_dir)
+            def is_within_directory(directory, target):
+                
+                abs_directory = os.path.abspath(directory)
+                abs_target = os.path.abspath(target)
+            
+                prefix = os.path.commonprefix([abs_directory, abs_target])
+                
+                return prefix == abs_directory
+            
+            def safe_extract(tar, path=".", members=None, *, numeric_owner=False):
+            
+                for member in tar.getmembers():
+                    member_path = os.path.join(path, member.name)
+                    if not is_within_directory(path, member_path):
+                        raise Exception("Attempted Path Traversal in Tar File")
+            
+                tar.extractall(path, members, numeric_owner=numeric_owner) 
+                
+            
+            safe_extract(archive_tar, extract_tmp_dir)
         log_fn(2, "Extraction to temporary directory complete. Moving to package directory...")
         shutil.move(os.path.join(extract_tmp_dir, package_version.archive_root_dir), target_dir)
         log_fn(3, "Move complete.")
